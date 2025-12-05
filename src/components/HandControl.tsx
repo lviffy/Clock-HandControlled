@@ -189,7 +189,7 @@ export default function HandControl({
     <div>
       <canvas ref={canvasRef} style={{ width: "100%", borderRadius: 12 }} />
       {!landmarkerReady && (
-        <p style={{ fontSize: 12, color: "#7aa3c7", marginTop: 6 }}>
+        <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>
           Loading hand model...
         </p>
       )}

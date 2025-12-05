@@ -3,12 +3,12 @@
   --bg-2: #0a0c10;
   --grid: rgba(255, 255, 255, 0.03);
   --accent: #5ac8ff;
-  --accent-strong: #d4f1ff;
-  --text: #e7f6ff;
-  --muted: #7fa5c5;
-  --card: rgba(10, 12, 16, 0.9);
-  --border: rgba(90, 200, 255, 0.25);
-  --glow: 0 0 10px rgba(90, 200, 255, 0.2);
+  --accent-strong: #b8e6ff;
+  --text: #d8f1ff;
+  --muted: #7aa3c7;
+  --card: rgba(4, 12, 24, 0.72);
+  --border: rgba(90, 200, 255, 0.5);
+  --glow: 0 0 18px rgba(90, 200, 255, 0.55);
 }
 
 html,
