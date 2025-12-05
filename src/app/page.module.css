@@ -353,20 +353,31 @@
   box-shadow: var(--shadow-float);
   z-index: 90;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
   animation: fadeIn 320ms ease-out;
 }
 
 .handVisualizer::before {
-  content: "SENSOR_FEED";
+  content: "";
   position: absolute;
-  top: 8px;
-  left: 8px;
-  font-size: 9px;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.visualizerLabel {
+  font-size: 10px;
   color: var(--muted);
   letter-spacing: 0.1em;
-  pointer-events: none;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(90, 200, 255, 0.15);
+  padding-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 @keyframes fadeIn {

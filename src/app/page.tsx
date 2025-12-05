@@ -184,6 +184,7 @@ export default function Home() {
         </div>
       </div>
       <div className={styles.handVisualizer}>
+        <div className={styles.visualizerLabel}>SENSOR_FEED</div>
         <HandControl
           tiltBaseline={tiltBaseline}
           tiltSensitivity={tiltSensitivity}
