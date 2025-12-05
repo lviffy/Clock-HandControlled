@@ -185,6 +185,31 @@ export default function HandControl({
     };
   }, []);
 
+  // Suppress benign TensorFlow Lite info logs
+  useEffect(() => {
+    const originalError = console.error;
+    const originalLog = console.log;
+
+    console.error = (...args) => {
+      if (args[0]?.toString().includes("Created TensorFlow Lite XNNPACK delegate for CPU")) {
+        return;
+      }
+      originalError.apply(console, args);
+    };
+
+    console.log = (...args) => {
+      if (args[0]?.toString().includes("Created TensorFlow Lite XNNPACK delegate for CPU")) {
+        return;
+      }
+      originalLog.apply(console, args);
+    };
+
+    return () => {
+      console.error = originalError;
+      console.log = originalLog;
+    };
+  }, []);
+
   return (
     <div>
       <canvas ref={canvasRef} style={{ width: "100%", borderRadius: 12 }} />
