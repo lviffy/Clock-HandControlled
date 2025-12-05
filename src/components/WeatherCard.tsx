@@ -4,10 +4,34 @@ import { useCallback, useEffect, useState } from "react";
 import TextScramble from "./TextScramble";
 import styles from "@/app/page.module.css";
 
+const ASCII_SUN = `   \\   /
+    .-.
+ --(   )--
+    '-'
+   /   \\`;
+
 const ASCII_CLOUD = `  .-.
  (   ).
 (___(__)
  ‘ ‘ ‘ ‘`;
+
+const ASCII_RAIN = `  .-.
+ (   ).
+(___(__)
+ ‘ ‘ ‘ ‘
+  ‘ ‘ ‘`;
+
+const ASCII_SNOW = `  .-.
+ (   ).
+(___(__)
+ *  *  *
+*  *  *`;
+
+const ASCII_STORM = `  .-.
+ (   ).
+(___(__)
+ ⚡ ⚡ ⚡
+  ‘ ‘ ‘`;
 
 type WeatherData = {
   temp: number;
@@ -16,10 +40,45 @@ type WeatherData = {
   windSpeed: number;
   windDirection: number;
   condition: string;
+  conditionCode: number;
   location: { lat: number; lon: number };
+  locationName: string;
 };
 
 type Status = "idle" | "locating" | "fetching" | "ready" | "error";
+
+function getAsciiForCondition(code: number): string {
+  // WMO Weather interpretation codes (WW)
+  // 0: Clear sky
+  // 1, 2, 3: Mainly clear, partly cloudy, and overcast
+  // 45, 48: Fog and depositing rime fog
+  // 51, 53, 55: Drizzle: Light, moderate, and dense intensity
+  // 56, 57: Freezing Drizzle: Light and dense intensity
+  // 61, 63, 65: Rain: Slight, moderate and heavy intensity
+  // 66, 67: Freezing Rain: Light and heavy intensity
+  // 71, 73, 75: Snow fall: Slight, moderate, and heavy intensity
+  // 77: Snow grains
+  // 80, 81, 82: Rain showers: Slight, moderate, and violent
+  // 85, 86: Snow showers slight and heavy
+  // 95: Thunderstorm: Slight or moderate
+  // 96, 99: Thunderstorm with slight and heavy hail
+
+  if (code === 0 || code === 1) return ASCII_SUN;
+  if (code === 2 || code === 3 || code === 45 || code === 48) return ASCII_CLOUD;
+  if (
+    (code >= 51 && code <= 67) ||
+    (code >= 80 && code <= 82)
+  )
+    return ASCII_RAIN;
+  if (
+    (code >= 71 && code <= 77) ||
+    (code >= 85 && code <= 86)
+  )
+    return ASCII_SNOW;
+  if (code >= 95) return ASCII_STORM;
+
+  return ASCII_CLOUD; // Default
+}
 
 async function fetchWeather(lat: number, lon: number) {
   const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`, {
@@ -75,19 +134,25 @@ export default function WeatherCard() {
   }, [loadWeather]);
 
   return (
-    <div>
+    <div className={styles.weatherCard}>
       <div className={styles.wxHeader}>
         <div>
-          <div className={styles.wxLabel}>TARGET_COORDINATES</div>
+          <div className={styles.wxLabel}>TARGET_SECTOR</div>
           <div className={styles.wxValue}>
             {status === "ready" && data
-              ? `LAT ${data.location.lat.toFixed(2)}, LON ${data.location.lon.toFixed(2)}`
-              : "Acquiring..."}
+              ? data.locationName
+              : status === "locating"
+                ? "LOCATING..."
+                : "ACQUIRING..."}
           </div>
         </div>
         <div className={styles.wxLabelRight}>
-          <div className={styles.wxLabel}>SECTOR: EARTH</div>
-          <div className={styles.wxLabel}>MODE: ATMOSPHERIC</div>
+          <div className={styles.wxLabel}>COORDINATES</div>
+          <div className={styles.wxLabel}>
+            {status === "ready" && data
+              ? `${data.location.lat.toFixed(2)}, ${data.location.lon.toFixed(2)}`
+              : "--, --"}
+          </div>
         </div>
       </div>
 
@@ -101,7 +166,7 @@ export default function WeatherCard() {
                   ? `${Math.round(data.temp)}°C`
                   : status === "error"
                     ? "ERR"
-                    : "----"
+                    : "--"
               }
               triggerKey={status}
             />
@@ -123,39 +188,29 @@ export default function WeatherCard() {
 
         <div className={styles.wxAsciiBox}>
           <div className={styles.wxAsciiLabel}>IMG_01</div>
-          <pre className={styles.wxAscii}>{ASCII_CLOUD}</pre>
+          <pre className={styles.wxAscii}>
+            {status === "ready" && data
+              ? getAsciiForCondition(data.conditionCode)
+              : ASCII_CLOUD}
+          </pre>
         </div>
       </div>
 
       <div className={styles.wxBottomRow}>
         <div className={styles.wxStat}>
-          <div className={styles.wxLabel}>HUMIDITY_LEVEL</div>
+          <div className={styles.wxLabel}>HUMIDITY</div>
           <div className={styles.wxStatValue}>
             {status === "ready" && data ? `${Math.round(data.humidity)}%` : "--"}
           </div>
         </div>
         <div className={styles.wxStat}>
-          <div className={styles.wxLabel}>WIND_VELOCITY</div>
+          <div className={styles.wxLabel}>WIND</div>
           <div className={styles.wxStatValue}>
             {status === "ready" && data
               ? `${Math.round(data.windSpeed)} km/h ${toCardinal(data.windDirection)}`
               : "--"}
           </div>
         </div>
-      </div>
-
-      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-        <button
-          className={styles.button}
-          onClick={() => {
-            void loadWeather();
-          }}
-        >
-          Refresh
-        </button>
-        <span className={styles.status}>
-          {status === "ready" ? "live" : status === "error" ? "error" : status}
-        </span>
       </div>
     </div>
   );

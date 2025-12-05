@@ -103,7 +103,13 @@ export default function HandControl({
         const loop = async () => {
           if (cancelled) return;
           const ctxCanvas = canvasRef.current;
-          if (!ctxCanvas || !video.videoWidth || video.readyState < 2) {
+          if (
+            !ctxCanvas ||
+            !video.videoWidth ||
+            video.readyState < 2 ||
+            video.paused ||
+            video.currentTime === 0
+          ) {
             rafRef.current = requestAnimationFrame(loop);
             return;
           }

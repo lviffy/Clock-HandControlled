@@ -50,9 +50,10 @@ export default function Home() {
   const [view, setView] = useState<ViewMode>("clock");
   const [theme] = useState<ThemeMode>("dark");
   const [brightness, setBrightness] = useState(1);
-  const [, setCameraStatus] = useState("idle");
+  const [cameraStatus, setCameraStatus] = useState("idle");
   const [tiltBaseline, setTiltBaseline] = useState<number | null>(null);
   const [tiltSensitivity] = useState(0.08);
+  const [lastGesture, setLastGesture] = useState<string>("--");
   const calibrationNonce = 0;
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function Home() {
   }, [theme]);
 
   const handleGesture = useCallback((event: GestureEvent) => {
+    setLastGesture(event.type.toUpperCase());
     if (event.type === "open-palm") {
       setView("clock");
     }
@@ -90,33 +92,38 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.floatingStatus}>
+        <div className={styles.statusLabel}>INPUT_SENSOR_v1.1</div>
+        <div className={styles.statusValue}>
+          {cameraStatus === "scanning" ? "SCANNING..." : cameraStatus.toUpperCase()}
+        </div>
+        <div className={styles.protocolLine}>
+          PROTOCOL: {lastGesture === "--" ? "WAITING" : lastGesture}
+        </div>
+      </div>
+
       <div
         className={styles.shell}
         style={{ ...themeVars, filter: `brightness(${brightness})` }}
       >
         <div className={styles.centerFrame}>
           <div className={styles.frameOutline} />
-          <div className={styles.header}>
-            <div className={styles.title}>
-              <TextScramble text="system.time.reference" triggerKey={view} />
-            </div>
-            <div className={styles.tag}>
-              <TextScramble
-                text={`${view === "clock" ? "CLOCK" : "WEATHER"} · ${theme.toUpperCase()}`}
-                triggerKey={`${view}-${theme}`}
-              />
-            </div>
-          </div>
+          <div className={styles.cornerTopLeft} />
+          <div className={styles.cornerTopRight} />
+          <div className={styles.cornerBottomLeft} />
+          <div className={styles.cornerBottomRight} />
+
           <div className={styles.contentCard}>
             {view === "clock" ? (
               <div className={styles.clock}>
+                <div className={styles.systemLabel}>SYSTEM_TIME_REFERENCE</div>
                 <div className={styles.timeRow}>
                   <span className={styles.time}>
                     {hydrated ? formatTime(now) : "--:--:--"}
                   </span>
                 </div>
                 <div className={styles.date}>
-                  {hydrated ? formatDate(now) : "----"}
+                  — {hydrated ? formatDate(now) : "----"} —
                 </div>
               </div>
             ) : (
